@@ -148,3 +148,34 @@ h2 {
   outline: none;
   border: none;
 }
+
+/* Highlight selected skills */
+.highlighted {
+  background-color: lightblue;
+  color: black;
+}
+
+/* Skills dropdown on the left */
+#skills {
+  width: 200px;
+  float: left;
+  margin-right: 20px;
+}
+
+/* Selected skills box on the right */
+#selectedSkillsContainer {
+  width: 200px;
+  float: right;
+}
+
+#selectedSkillsList {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+#selectedSkillsList li {
+  background-color: lightgreen;
+  padding: 5px;
+  margin-bottom: 5px;
+}
+

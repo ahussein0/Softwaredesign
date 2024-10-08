@@ -22,8 +22,20 @@ function isEmailValid(email) {
   return emailRegex.test(email);
 }
 
+// Stronger password validation
+function isPasswordStrong(password) {
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;  // At least 6 chars, 1 letter, 1 number
+  return passwordRegex.test(password);
+}
+
 function isFieldValid(field, minLength = 1) {
   return field && field.length >= minLength;
+}
+
+// Date validation: Ensure it's in the format YYYY-MM-DD
+function isValidDate(dateString) {
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;  // Example: YYYY-MM-DD
+  return dateRegex.test(dateString);
 }
 
 // Root route
@@ -31,7 +43,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Registration route
+// Registration route with stronger password validation
 app.post('/register', (req, res) => {
   const { email, password } = req.body;
 
@@ -39,8 +51,8 @@ app.post('/register', (req, res) => {
     return res.status(400).json({ status: 'failure', message: 'Invalid email format' });
   }
 
-  if (!isFieldValid(password, 6)) {
-    return res.status(400).json({ status: 'failure', message: 'Password must be at least 6 characters long' });
+  if (!isPasswordStrong(password)) {
+    return res.status(400).json({ status: 'failure', message: 'Password must contain at least 6 characters, with at least 1 letter and 1 number' });
   }
 
   if (users[email]) {
@@ -66,7 +78,7 @@ app.post('/login', (req, res) => {
   res.status(200).json({ status: 'success', message: 'Logged in successfully' });
 });
 
-// Profile update route
+// Profile update route with better validation for skills and availability
 app.post('/profile', (req, res) => {
   const { fullName, address, skills, availability } = req.body;
 
@@ -78,6 +90,14 @@ app.post('/profile', (req, res) => {
     return res.status(400).json({ status: 'failure', message: 'Address must be at least 5 characters long' });
   }
 
+  if (!Array.isArray(skills) || skills.length === 0) {
+    return res.status(400).json({ status: 'failure', message: 'Skills must be a non-empty array' });
+  }
+
+  if (!Array.isArray(availability) || availability.some(date => !isValidDate(date))) {
+    return res.status(400).json({ status: 'failure', message: 'Availability must be a list of valid dates in the format YYYY-MM-DD' });
+  }
+
   const email = 'user@example.com'; // Dummy user for this example
   if (users[email]) {
     users[email].profile = { fullName, address, skills, availability };
@@ -87,7 +107,7 @@ app.post('/profile', (req, res) => {
   }
 });
 
-// Event creation route
+// Event creation route with valid date check
 app.post('/events', (req, res) => {
   const { eventName, eventLocation, requiredSkills, urgency, eventDate } = req.body;
 
@@ -107,8 +127,8 @@ app.post('/events', (req, res) => {
     return res.status(400).json({ status: 'failure', message: 'Urgency must be one of high, medium, or low' });
   }
 
-  if (!eventDate) {
-    return res.status(400).json({ status: 'failure', message: 'Event date is required' });
+  if (!isValidDate(eventDate)) {
+    return res.status(400).json({ status: 'failure', message: 'Event date must be in the format YYYY-MM-DD' });
   }
 
   const newEvent = { eventName, eventLocation, requiredSkills, urgency, eventDate };
